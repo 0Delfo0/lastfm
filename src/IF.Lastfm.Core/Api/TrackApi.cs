@@ -62,6 +62,33 @@ namespace IF.Lastfm.Core.Api
             return await command.ExecuteAsync();
         }
 
+        public async Task<LastResponse<LastTrack>> GetInfoAsync(string trackname, string artistname, string username = "", bool autocorrect = false)
+        {
+            var command = new GetInfoCommand(Auth)
+            {
+                TrackName = trackname,
+                ArtistName = artistname,
+                Username = username,
+                Autocorrect = autocorrect,
+                HttpClient = HttpClient
+            };
+
+            return await command.ExecuteAsync();
+        }
+
+        public async Task<LastResponse<LastTrack>> GetInfoByMbidAsync(string mbid, string username = "", bool autocorrect = false)
+        {
+            var command = new GetInfoCommand(Auth)
+            {
+                TrackMbid = mbid,
+                Username = username,
+                Autocorrect = autocorrect,
+                HttpClient = HttpClient
+            };
+
+            return await command.ExecuteAsync();
+        }
+
         public async Task<LastResponse<LastTrack>> GetInfoByMbidAsync(string mbid)
         {
             var command = new GetInfoCommand(Auth)
@@ -100,7 +127,7 @@ namespace IF.Lastfm.Core.Api
             {
                 HttpClient = HttpClient
             };
-            return await command.ExecuteAsync(); 
+            return await command.ExecuteAsync();
         }
 
         public async Task<PageResponse<LastTrack>> SearchAsync(string trackname, int page = 1, int itemsPerPage = LastFm.DefaultPageLength)
