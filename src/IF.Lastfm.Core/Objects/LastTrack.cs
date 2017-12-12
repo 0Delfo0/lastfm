@@ -28,12 +28,14 @@ namespace IF.Lastfm.Core.Objects
         public Uri Url { get; set; }
 
         public LastImageSet Images { get; set; }
-        
+
         public string AlbumName { get; set; }
 
         public int? ListenerCount { get; set; }
 
         public int? PlayCount { get; set; }
+
+        public int? UserPlayCount { get; set; }
 
         public IEnumerable<LastTag> TopTags { get; set; }
 
@@ -46,7 +48,7 @@ namespace IF.Lastfm.Core.Objects
         public int? Rank { get; set; }
 
         #endregion
-        
+
         /// <summary>
         /// Parses the given JToken into a track
         /// </summary>
@@ -67,6 +69,20 @@ namespace IF.Lastfm.Core.Objects
             if (int.TryParse(playCountStr, out playCount))
             {
                 t.PlayCount = playCount;
+            }
+
+            var listenerCountStr = token.Value<string>("listeners");
+            int listenerCount;
+            if (int.TryParse(listenerCountStr, out listenerCount))
+            {
+                t.ListenerCount = listenerCount;
+            }
+
+            var userPlayCountStr = token.Value<string>("userplaycount");
+            int userPlayCount;
+            if (int.TryParse(userPlayCountStr, out userPlayCount))
+            {
+                t.UserPlayCount = userPlayCount;
             }
 
             t.Url = new Uri(token.Value<string>("url"), UriKind.Absolute);
@@ -151,7 +167,7 @@ namespace IF.Lastfm.Core.Objects
         {
             var t = ParseJToken(token);
             t.AlbumName = albumName;
-            
+
             // the api returns seconds for this value when not track.getInfo
             var secs = token.Value<double>("duration");
             t.Duration = TimeSpan.FromSeconds(secs);

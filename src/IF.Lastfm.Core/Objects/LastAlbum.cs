@@ -12,14 +12,16 @@ namespace IF.Lastfm.Core.Objects
         public string Name { get; set; }
 
         public IEnumerable<LastTrack> Tracks { get; set; }
-        
+
         public string ArtistName { get; set; }
-        
+
         public DateTimeOffset? ReleaseDateUtc { get; set; }
 
         public int? ListenerCount { get; set; }
 
         public int? PlayCount { get; set; }
+
+        public int? UserPlayCount { get; set; }
 
         public string Mbid { get; set; }
 
@@ -28,7 +30,7 @@ namespace IF.Lastfm.Core.Objects
         public Uri Url { get; set; }
 
         public LastImageSet Images { get; set; }
-        
+
         internal static LastAlbum ParseJToken(JToken token)
         {
             var a = new LastAlbum();
@@ -52,7 +54,7 @@ namespace IF.Lastfm.Core.Objects
                 if (trackToken != null)
                     a.Tracks = trackToken.Type == JTokenType.Array
                         ? trackToken.Children().Select(t => LastTrack.ParseJToken(t, a.Name))
-                        : new List<LastTrack>() {LastTrack.ParseJToken(trackToken, a.Name)};
+                        : new List<LastTrack>() { LastTrack.ParseJToken(trackToken, a.Name) };
             }
             else
             {
@@ -65,9 +67,9 @@ namespace IF.Lastfm.Core.Objects
                 var tagToken = tagsToken.SelectToken("tag");
                 if (tagToken != null)
                 {
-                    a.TopTags = 
-                        tagToken.Type == JTokenType.Array 
-                        ? tagToken.Children().Select(token1 => LastTag.ParseJToken(token1)) 
+                    a.TopTags =
+                        tagToken.Type == JTokenType.Array
+                        ? tagToken.Children().Select(token1 => LastTag.ParseJToken(token1))
                         : new List<LastTag> { LastTag.ParseJToken(tagToken) };
                 }
             }
@@ -75,7 +77,7 @@ namespace IF.Lastfm.Core.Objects
             {
                 a.TopTags = Enumerable.Empty<LastTag>();
             }
-    
+
             a.ListenerCount = token.Value<int?>("listeners");
             a.Mbid = token.Value<string>("mbid");
             a.Name = token.Value<string>("name");
@@ -87,13 +89,20 @@ namespace IF.Lastfm.Core.Objects
                 a.PlayCount = playCount;
             }
 
+            var userPlayCountStr = token.Value<string>("userplaycount");
+            int userPlayCount;
+            if (int.TryParse(userPlayCountStr, out userPlayCount))
+            {
+                a.UserPlayCount = userPlayCount;
+            }
+
             var images = token.SelectToken("image");
             if (images != null)
             {
                 var imageCollection = LastImageSet.ParseJToken(images);
                 a.Images = imageCollection;
             }
-            
+
             a.Url = new Uri(token.Value<string>("url"), UriKind.Absolute);
 
             var dateString = token.Value<string>("releasedate");
@@ -111,7 +120,7 @@ namespace IF.Lastfm.Core.Objects
             var name = albumToken.Value<string>("title")
                        ?? albumToken.Value<string>("#text")
                        ?? albumToken.Value<string>("name"); // Used in Library track lists
-            
+
             return name;
         }
     }
